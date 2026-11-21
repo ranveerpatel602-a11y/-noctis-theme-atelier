@@ -1,4 +1,5 @@
 const themes=[
+{id:"nocturne",name:"NOCTURNE",type:"DARK · VIOLET",tag:"dark",desc:"Midnight navy and burgundy atmosphere, violet glow, glass-inspired icon mood and matching lock-screen concept.",palette:"art-nocturne"},
 {id:"moonlit",name:"Moonlit",type:"DARK",tag:"dark",desc:"Lilac moon glow, deep twilight gradients and quiet night icons.",palette:"art-moon"},
 {id:"sandstone",name:"Sandstone",type:"MINIMAL",tag:"minimal",desc:"Warm stone colors, understated shapes and a calm neutral mood.",palette:"art-sand"},
 {id:"evergreen",name:"Evergreen",type:"NATURE",tag:"nature",desc:"Forest greens and soft botanical-inspired accents.",palette:"art-forest"},
