@@ -55,3 +55,5 @@ dialog{background:var(--surface);color:var(--fg);border:1px solid var(--line);bo
 .about{padding:55px 5vw}.about h2{font-size:39px}.about-copy{font-size:12px;line-height:1.7}
 footer{padding:20px 5vw;gap:10px;flex-direction:column;font-size:8px}}
 @media(max-width:360px){.logo small{display:none}.hero h1{font-size:40px}.theme-grid{gap:8px}.theme-meta{padding:10px}.theme-meta h3{font-size:14px}.card-bottom{gap:5px}.detail-btn{padding:7px 8px;font-size:9px}.wall-text h2{font-size:36px}}
+
+.art-nocturne{background:radial-gradient(ellipse at 68% 32%,#6a315e 0%,#35203b 26%,#151723 68%,#101119)}.art-nocturne:before{background:radial-gradient(circle,#bb8bc8,#754e89 55%,#39243e);box-shadow:0 0 80px #a66ac5}.art-nocturne:after{background:#1a1828;transform:translate(-35%,30%);opacity:.65}
