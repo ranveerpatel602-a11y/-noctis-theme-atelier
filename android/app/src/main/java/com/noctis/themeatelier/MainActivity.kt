@@ -178,7 +178,7 @@ class MainActivity : Activity() {
             }
         }
         container.addView(loadThemeBtn,LinearLayout.LayoutParams(-1,-2).apply { topMargin=dp(8) })
-        container.addView(text("Choose Noctis in Android’s Home app settings to use this launcher as your home screen. Apps outside this launcher keep their original icons.",11f,0xFFB4B4C2.toInt()).apply { setPadding(0,dp(16),0,0 }))
+        container.addView(text("Choose Noctis in Android’s Home app settings to use this launcher as your home screen. Apps outside this launcher keep their original icons.",11f,0xFFB4B4C2.toInt()).apply { setPadding(0,dp(16),0,0) })
     }
 
     private fun openWallpaperPicker() {
