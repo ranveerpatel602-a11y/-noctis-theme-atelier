@@ -160,7 +160,7 @@ class MainActivity : Activity() {
             setOnClickListener {
                 prefs.edit().putInt("saved_theme_pack",packIndex)
                     .putString("saved_wallpaper_uri",selectedWallpaperUri?.toString() ?: "").apply()
-                Toast.makeText(this,"Theme saved on this phone.",Toast.LENGTH_SHORT).show()
+                Toast.makeText(this@MainActivity,"Theme saved on this phone.",Toast.LENGTH_SHORT).show()
             }
         }
         container.addView(saveThemeBtn,LinearLayout.LayoutParams(-1,-2).apply { topMargin=dp(8) })
@@ -174,7 +174,7 @@ class MainActivity : Activity() {
                     selectedWallpaperUri=savedUri?.takeIf { it.isNotBlank() }?.let { Uri.parse(it) }
                     prefs.edit().putInt("pack",packIndex).putString("wallpaper_uri",selectedWallpaperUri?.toString() ?: "").apply()
                     render()
-                } else Toast.makeText(this,"No saved theme yet.",Toast.LENGTH_SHORT).show()
+                } else Toast.makeText(this@MainActivity,"No saved theme yet.",Toast.LENGTH_SHORT).show()
             }
         }
         container.addView(loadThemeBtn,LinearLayout.LayoutParams(-1,-2).apply { topMargin=dp(8) })
