@@ -85,7 +85,7 @@ class MainActivity : Activity() {
         }
         container.addView(creatorButton,LinearLayout.LayoutParams(-1,-2).apply{topMargin=dp(14)})
         container.addView(text("Good day.",28f,Color.WHITE,true).apply { setPadding(0,dp(20),0,0) })
-        container.addView(text("Make this home yours.",14f,0xFFB9BBC8.toInt()).apply { setPadding(0,dp(4),0,dp(16) })
+        container.addView(text("Make this home yours.",14f,0xFFB9BBC8.toInt()).apply { setPadding(0,dp(4),0,dp(16)) }))
 
         val search=EditText(this).apply {
             hint="Search apps"
@@ -113,7 +113,7 @@ class MainActivity : Activity() {
                 val lp=GridLayout.LayoutParams(GridLayout.spec(index/4),GridLayout.spec(index%4,1f))
                 lp.width=0; lp.setMargins(dp(3),dp(2),dp(3),dp(2)); grid.addView(tile,lp)
             }
-            if(filtered.isEmpty()) grid.addView(text("No apps found",13f,0xFFB8B8C5.toInt()).apply { setPadding(0,dp(12),0,dp(12)) })
+            if(filtered.isEmpty()) grid.addView(text("No apps found",13f,0xFFB8B8C5.toInt()).apply { setPadding(0,dp(12),0,dp(12)) }))
         }
         populate("")
         search.addTextChangedListener(object:TextWatcher {
