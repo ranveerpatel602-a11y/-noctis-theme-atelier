@@ -72,3 +72,5 @@ footer{padding:20px 5vw;gap:10px;flex-direction:column;font-size:8px}}
 .theme-screen-status,.theme-screen-date,.theme-screen-clock,.theme-screen-weather,.theme-screen-icons,.theme-screen-dock{z-index:1}
 .preview-phone{background-image:url("https://raw.githubusercontent.com/ranveerpatel602-a11y/-noctis-theme-atelier/main/assets/wallpaper/nocturne.svg");background-position:center;background-size:cover}
 .preview-phone:before{display:none}
+
+.pack-download{background:var(--gold);color:#17161c;border-color:var(--gold);font-weight:700}.pack-download:disabled{opacity:.65;cursor:wait}
