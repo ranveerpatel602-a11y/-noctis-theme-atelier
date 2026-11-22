@@ -15,6 +15,7 @@ import android.graphics.Shader
 import android.graphics.Color
 import android.graphics.drawable.GradientDrawable
 import android.os.Bundle
+import android.provider.Settings
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.Gravity
@@ -178,7 +179,15 @@ class MainActivity : Activity() {
             }
         }
         container.addView(loadThemeBtn,LinearLayout.LayoutParams(-1,-2).apply { topMargin=dp(8) })
-        container.addView(text("Choose Noctis in Android’s Home app settings to use this launcher as your home screen. Apps outside this launcher keep their original icons.",11f,0xFFB4B4C2.toInt()).apply { setPadding(0,dp(16),0,0) })
+        val homeSettingsBtn=text("SET NOCTIS AS HOME APP",13f,p.accent,true).apply {
+            gravity=Gravity.CENTER; background=bg(0x22FFFFFF,16); setPadding(dp(12),dp(15),dp(12),dp(15))
+            setOnClickListener {
+                try { startActivity(Intent(Settings.ACTION_MANAGE_DEFAULT_APPS_SETTINGS)) }
+                catch (_:Exception) { Toast.makeText(this@MainActivity,"Open Android Settings -> Default apps -> Home app.",Toast.LENGTH_LONG).show() }
+            }
+        }
+        container.addView(homeSettingsBtn,LinearLayout.LayoutParams(-1,-2).apply { topMargin=dp(8) })
+        container.addView(text("Choose Noctis in Android settings to use this launcher as your home screen. Apps outside this launcher keep their original icons.",11f,0xFFB4B4C2.toInt()).apply { setPadding(0,dp(16),0,0) })
     }
 
     private fun openWallpaperPicker() {
