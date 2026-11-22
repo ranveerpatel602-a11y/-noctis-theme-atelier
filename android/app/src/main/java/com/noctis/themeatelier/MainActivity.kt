@@ -87,7 +87,7 @@ class MainActivity : Activity() {
             hint="Search apps"
             setHintTextColor(0xFFB5B5C2.toInt()); setTextColor(Color.WHITE)
             textSize=14f; singleLine=true
-            background=bg(0x223FFFFFF.toInt(),24)
+            background=bg(0x22FFFFFF.toInt(),24)
             setPadding(dp(16),dp(10),dp(16),dp(10))
         }
         container.addView(search,LinearLayout.LayoutParams(-1,dp(48)))
