@@ -72,14 +72,14 @@ class MainActivity : Activity() {
 
         val top=LinearLayout(this).apply { orientation=LinearLayout.HORIZONTAL; gravity=Gravity.CENTER_VERTICAL }
         top.addView(text("NOCTIS",12f,p.accent,true),LinearLayout.LayoutParams(0,-2,1f))
-        top.addView(text("⋯",26f,Color.WHITE).apply { gravity=Gravity.CENTER; background=bg(0x223FFFFFF.toInt(),24); setPadding(dp(14),dp(3),dp(14),dp(3)) })
+        top.addView(text("⋯",26f,Color.WHITE).apply { gravity=Gravity.CENTER; background=bg(0x22FFFFFF,24); setPadding(dp(14),dp(3),dp(14),dp(3)) })
         container.addView(top)
         container.addView(text("Good day.",28f,Color.WHITE,true).apply { setPadding(0,dp(20),0,0) })
         container.addView(text("Make this home yours.",14f,0xFFB9BBC8.toInt()).apply { setPadding(0,dp(4),0,dp(16) })
 
         val search=EditText(this).apply {
             hint="Search apps"
-            setHintTextColor(0xFFB5B5C2.toInt(); setTextColor(Color.WHITE)
+            setHintTextColor(0xFFB5B5C2.toInt()); setTextColor(Color.WHITE)
             textSize=14f; singleLine=true
             background=bg(0x223FFFFFF.toInt(),24)
             setPadding(dp(16),dp(10),dp(16),dp(10))
