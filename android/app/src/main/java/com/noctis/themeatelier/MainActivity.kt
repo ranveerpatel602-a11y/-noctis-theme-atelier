@@ -152,6 +152,15 @@ class MainActivity : Activity() {
             setOnClickListener { openWallpaperPicker() }
         }
         container.addView(photoBtn,LinearLayout.LayoutParams(-1,-2).apply { topMargin=dp(8) })
+        val resetWallpaperBtn=text("RESET TO NOCTIS WALLPAPER",12f,Color.WHITE,true).apply {
+            gravity=Gravity.CENTER; background=bg(0x22FFFFFF,16); setPadding(dp(12),dp(13),dp(12),dp(13))
+            setOnClickListener {
+                selectedWallpaperUri=null
+                prefs.edit().remove("wallpaper_uri").apply()
+                render()
+            }
+        }
+        container.addView(resetWallpaperBtn,LinearLayout.LayoutParams(-1,-2).apply { topMargin=dp(8) })
         selectedWallpaperUri?.let { uri ->
             val preview=ImageView(this).apply { setImageURI(uri); scaleType=ImageView.ScaleType.CENTER_CROP }
             container.addView(preview,LinearLayout.LayoutParams(-1,dp(220)).apply { topMargin=dp(10) })
