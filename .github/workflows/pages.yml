@@ -2,6 +2,13 @@ name: Deploy Noctis Theme Atelier to GitHub Pages
 on:
   push:
     branches: [main]
+    paths:
+      - "index.html"
+      - "app.js"
+      - "styles.css"
+      - "assets/**"
+      - "README.md"
+      - ".github/workflows/pages.yml"
   workflow_dispatch:
 permissions:
   contents: read
