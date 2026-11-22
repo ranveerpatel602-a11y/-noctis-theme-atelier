@@ -3,6 +3,7 @@ package com.noctis.themeatelier
 import android.app.Activity
 import android.app.WallpaperManager
 import android.content.Intent
+import android.content.pm.ResolveInfo
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Paint
@@ -11,8 +12,11 @@ import android.graphics.Shader
 import android.graphics.Color
 import android.graphics.drawable.GradientDrawable
 import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
 import android.view.Gravity
 import android.view.View
+import android.widget.EditText
 import android.widget.GridLayout
 import android.widget.ImageView
 import android.widget.LinearLayout
@@ -21,148 +25,136 @@ import android.widget.TextView
 import android.widget.Toast
 
 class MainActivity : Activity() {
-    data class Theme(val name: String, val description: String, val top: Int, val bottom: Int, val accent: Int)
-    private val themes = listOf(
-        Theme("Nocturne", "Midnight violet", 0xFF12101D.toInt(), 0xFF48335D.toInt(), 0xFFC4A7FF.toInt()),
-        Theme("Moonlit", "Silver night", 0xFF091A2C.toInt(), 0xFF3A5879.toInt(), 0xFFB6D8FF.toInt()),
-        Theme("Sandstone", "Warm earth", 0xFF38291F.toInt(), 0xFFB78B61.toInt(), 0xFFF4D4A9.toInt()),
-        Theme("Evergreen", "Forest calm", 0xFF071E19.toInt(), 0xFF30634C.toInt(), 0xFFB8E2C4.toInt()),
-        Theme("Rose Noir", "Muted rose", 0xFF24131E.toInt(), 0xFF8A4E67.toInt(), 0xFFF5B6D0.toInt()),
-        Theme("Glacier", "Ice blue", 0xFF0C2231.toInt(), 0xFF5A9BB5.toInt(), 0xFFC2F2FF.toInt()),
-        Theme("Citrus Dusk", "Golden hour", 0xFF342014.toInt(), 0xFFAA6930.toInt(), 0xFFFFD78A.toInt())
+    data class ThemePack(val title:String, val subtitle:String, val base:Int, val light:Int, val accent:Int)
+    private val packs = listOf(
+        ThemePack("Midnight", "Deep violet • Liquid glass", 0xFF10101A.toInt(), 0xFF42345F.toInt(), 0xFFC6B5FF.toInt()),
+        ThemePack("Ocean", "Blue horizon", 0xFF071B2B.toInt(), 0xFF286180.toInt(), 0xFFB6E6FF.toInt()),
+        ThemePack("Sand", "Warm minimal", 0xFF33261C.toInt(), 0xFF9D754D.toInt(), 0xFFFFD9A8.toInt()),
+        ThemePack("Forest", "Natural green", 0xFF081C17.toInt(), 0xFF285B45.toInt(), 0xFFB8E7C9.toInt()),
+        ThemePack("Rose", "Soft rose dusk", 0xFF24131D.toInt(), 0xFF834A65.toInt(), 0xFFFFBCD7.toInt()),
+        ThemePack("Ice", "Cool glacier", 0xFF092131.toInt(), 0xFF438BA7.toInt(), 0xFFC5F2FF.toInt()),
+        ThemePack("Sunset", "Amber glow", 0xFF302015.toInt(), 0xFF9E5D2B.toInt(), 0xFFFFD28B.toInt())
     )
-    private var selected = 0
-    private lateinit var root: LinearLayout
+    private var packIndex = 0
+    private lateinit var container: LinearLayout
+    private var searchText = ""
+    private val prefs by lazy { getSharedPreferences("noctis-launcher", MODE_PRIVATE) }
+    private val appList by lazy { queryApps() }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        selected = getSharedPreferences("noctis", MODE_PRIVATE).getInt("theme", 0).coerceIn(themes.indices)
+        packIndex = prefs.getInt("pack",0).coerceIn(packs.indices)
         render()
     }
 
-    private fun dp(n: Int) = (n * resources.displayMetrics.density).toInt()
+    private fun dp(v:Int)= (v*resources.displayMetrics.density).toInt()
+    private fun pack()=packs[packIndex]
+    private fun bg(color:Int, radius:Int, stroke:Int=0): GradientDrawable = GradientDrawable().apply {
+        setColor(color); cornerRadius=dp(radius).toFloat()
+        if(stroke!=0) setStroke(dp(1),stroke)
+    }
+    private fun text(value:String, size:Float, color:Int, bold:Boolean=false)=TextView(this).apply {
+        text=value; textSize=size; setTextColor(color)
+        if(bold) setTypeface(android.graphics.Typeface.DEFAULT,android.graphics.Typeface.BOLD)
+    }
 
     private fun render() {
-        val theme = themes[selected]
-        window.statusBarColor = theme.top
-        window.navigationBarColor = theme.top
-        val scroll = ScrollView(this)
-        root = LinearLayout(this).apply {
-            orientation = LinearLayout.VERTICAL
-            setPadding(dp(20), dp(22), dp(20), dp(28))
-            setBackgroundColor(theme.top)
+        val p=pack()
+        window.statusBarColor=p.base
+        window.navigationBarColor=p.base
+        val scroller=ScrollView(this)
+        container=LinearLayout(this).apply {
+            orientation=LinearLayout.VERTICAL
+            setPadding(dp(20),dp(18),dp(20),dp(28))
+            setBackgroundColor(p.base)
         }
-        scroll.addView(root)
-        setContentView(scroll)
+        scroller.addView(container); setContentView(scroller)
 
-        root.addView(label("NOCTIS", 12f, theme.accent, true).apply { letterSpacing = .18f })
-        root.addView(label("Your home.\nYour atmosphere.", 28f, Color.WHITE, true).apply { setPadding(0, dp(6), 0, dp(6)) })
-        root.addView(label("Choose a theme, then apply wallpaper and launcher styling.", 14f, 0xFFBDBCC9.toInt()).apply { setPadding(0, 0, 0, dp(18)) })
+        val top=LinearLayout(this).apply { orientation=LinearLayout.HORIZONTAL; gravity=Gravity.CENTER_VERTICAL }
+        top.addView(text("NOCTIS",12f,p.accent,true),LinearLayout.LayoutParams(0,-2,1f))
+        top.addView(text("⋯",26f,Color.WHITE).apply { gravity=Gravity.CENTER; background=bg(0x223FFFFFF.toInt(),24); setPadding(dp(14),dp(3),dp(14),dp(3)) })
+        container.addView(top)
+        container.addView(text("Good day.",28f,Color.WHITE,true).apply { setPadding(0,dp(20),0,0) })
+        container.addView(text("Make this home yours.",14f,0xFFB9BBC8.toInt()).apply { setPadding(0,dp(4),0,dp(16) })
 
-        val themeTitle = label("THEME COLLECTION", 12f, theme.accent, true).apply { setPadding(0, dp(4), 0, dp(10)) }
-        root.addView(themeTitle)
-        themes.forEachIndexed { index, item ->
-            val card = LinearLayout(this).apply {
-                orientation = LinearLayout.VERTICAL
-                setPadding(dp(14), dp(12), dp(14), dp(12))
-                background = rounded(if (index == selected) item.accent else 0xFF292833.toInt(), dp(14))
-            }
-            val row = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL; gravity = Gravity.CENTER_VERTICAL }
-            val swatch = View(this).apply { background = rounded(item.bottom, dp(12)) }
-            row.addView(swatch, LinearLayout.LayoutParams(dp(54), dp(54)))
-            val details = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL; setPadding(dp(12), 0, 0, 0) }
-            details.addView(label(item.name, 17f, if (index == selected) theme.top else Color.WHITE, true))
-            details.addView(label(item.description, 12f, if (index == selected) theme.top else 0xFFBDBCC9.toInt()).apply { setPadding(0, dp(3), 0, 0) })
-            row.addView(details, LinearLayout.LayoutParams(0, -2, 1f))
-            row.addView(label(if (index == selected) "SELECTED" else "SELECT", 10f, if (index == selected) theme.top else item.accent, true))
-            card.addView(row)
-            card.setOnClickListener { selected = index; getSharedPreferences("noctis", MODE_PRIVATE).edit().putInt("theme", selected).apply(); render() }
-            val params = LinearLayout.LayoutParams(-1, -2)
-            params.bottomMargin = dp(8)
-            root.addView(card, params)
+        val search=EditText(this).apply {
+            hint="Search apps"
+            setHintTextColor(0xFFB5B5C2.toInt(); setTextColor(Color.WHITE)
+            textSize=14f; singleLine=true
+            background=bg(0x223FFFFFF.toInt(),24)
+            setPadding(dp(16),dp(10),dp(16),dp(10))
         }
-
-        val apply = TextView(this).apply {
-            text = "APPLY WALLPAPER + LAUNCHER THEME"
-            textSize = 14f
-            gravity = Gravity.CENTER
-            setTextColor(theme.top)
-            background = rounded(theme.accent, dp(14))
-            setPadding(dp(14), dp(17), dp(14), dp(17))
-            setOnClickListener { applyTheme(theme) }
+        container.addView(search,LinearLayout.LayoutParams(-1,dp(48)))
+        container.addView(text("APP LIBRARY",11f,p.accent,true).apply { setPadding(0,dp(22),0,dp(10)) })
+        val grid=GridLayout(this).apply { columnCount=4 }
+        container.addView(grid)
+        fun populate(filter:String) {
+            grid.removeAllViews()
+            val filtered=appList.filter { it.loadLabel(packageManager).toString().contains(filter,true) }
+            filtered.forEachIndexed { index,ri ->
+                val tile=LinearLayout(this).apply { orientation=LinearLayout.VERTICAL; gravity=Gravity.CENTER; setPadding(dp(4),dp(8),dp(4),dp(8)) }
+                val icon=ImageView(this).apply { setImageDrawable(ri.loadIcon(packageManager)); scaleType=ImageView.ScaleType.FIT_CENTER; background=bg(0x25FFFFFF,17,p.accent); setPadding(dp(8),dp(8),dp(8),dp(8)) }
+                tile.addView(icon,LinearLayout.LayoutParams(dp(56),dp(56)))
+                tile.addView(text(ri.loadLabel(packageManager).toString(),11f,Color.WHITE).apply { gravity=Gravity.CENTER; maxLines=2; setPadding(0,dp(5),0,0 },LinearLayout.LayoutParams(-1,-2))
+                tile.setOnClickListener {
+                    try { startActivity(packageManager.getLaunchIntentForPackage(ri.activityInfo.packageName)) }
+                    catch (_:Exception) { Toast.makeText(this,"Unable to open app",Toast.LENGTH_SHORT).show() }
+                }
+                val lp=GridLayout.LayoutParams(GridLayout.spec(index/4),GridLayout.spec(index%4,1f))
+                lp.width=0; lp.setMargins(dp(3),dp(2),dp(3),dp(2)); grid.addView(tile,lp)
+            }
+            if(filtered.isEmpty()) grid.addView(text("No apps found",13f,0xFFB8B8C5.toInt()).apply { setPadding(0,dp(12),0,dp(12) })
         }
-        root.addView(apply, LinearLayout.LayoutParams(-1, -2).apply { topMargin = dp(12); bottomMargin = dp(22) })
+        populate("")
+        search.addTextChangedListener(object:TextWatcher {
+            override fun beforeTextChanged(s:CharSequence?,start:Int,count:Int,after:Int){}
+            override fun onTextChanged(s:CharSequence?,start:Int,before:Int,count:Int){populate(s?.toString().orEmpty())}
+            override fun afterTextChanged(s:Editable?){}
+        })
 
-        root.addView(label("HOME SCREEN APPS", 12f, theme.accent, true).apply { setPadding(0, 0, 0, dp(12)) })
-        val grid = GridLayout(this).apply { columnCount = 4; alignmentMode = GridLayout.ALIGN_MARGINS }
-        val apps = getLaunchableApps()
-        apps.forEachIndexed { index, info ->
-            val tile = LinearLayout(this).apply {
-                orientation = LinearLayout.VERTICAL
-                gravity = Gravity.CENTER
-                setPadding(dp(6), dp(10), dp(6), dp(10))
+        container.addView(text("WALLPAPER & COLORS",11f,p.accent,true).apply { setPadding(0,dp(22),0,dp(10)) })
+        val themeRow=LinearLayout(this).apply { orientation=LinearLayout.HORIZONTAL }
+        packs.forEachIndexed { i,t ->
+            val chip=text(t.title,11f,if(i==packIndex)p.base else Color.WHITE,true).apply {
+                gravity=Gravity.CENTER; background=bg(if(i==packIndex)p.accent else 0x24FFFFFF,20); setPadding(dp(12),dp(9),dp(12),dp(9))
+                setOnClickListener { packIndex=i; prefs.edit().putInt("pack",i).apply(); render() }
             }
-            val iconBg = ImageView(this).apply {
-                setImageDrawable(info.loadIcon(packageManager))
-                background = rounded(0xFF302D3A.toInt(), dp(18))
-                setPadding(dp(10), dp(10), dp(10), dp(10))
-                scaleType = ImageView.ScaleType.FIT_CENTER
-            }
-            tile.addView(iconBg, LinearLayout.LayoutParams(dp(56), dp(56)))
-            tile.addView(label(info.loadLabel(packageManager).toString(), 11f, Color.WHITE).apply {
-                gravity = Gravity.CENTER; maxLines = 2; setPadding(0, dp(5), 0, 0)
-            }, LinearLayout.LayoutParams(-1, -2))
-            tile.setOnClickListener {
-                try { startActivity(packageManager.getLaunchIntentForPackage(info.activityInfo.packageName)) }
-                catch (_: Exception) { Toast.makeText(this, "App couldn't open", Toast.LENGTH_SHORT).show() }
-            }
-            val lp = GridLayout.LayoutParams(GridLayout.spec(index / 4), GridLayout.spec(index % 4, 1f))
-            lp.width = 0
-            lp.setMargins(dp(2), dp(2), dp(2), dp(2))
-            grid.addView(tile, lp)
+            themeRow.addView(chip,LinearLayout.LayoutParams(-2,-2).apply { rightMargin=dp(6) })
         }
-        root.addView(grid)
-        root.addView(label("Set Noctis as your default Home app to use this launcher. Icons and system UI outside this launcher may remain unchanged depending on your phone.", 12f, 0xFFBDBCC9.toInt()).apply { setPadding(0, dp(18), 0, 0 })
+        val themeScroll=ScrollView(this).apply { isFillViewport=false }
+        val horizontal=LinearLayout(this).apply { orientation=LinearLayout.HORIZONTAL }
+        packs.forEachIndexed { i,t ->
+            val preview=LinearLayout(this).apply { orientation=LinearLayout.VERTICAL; setPadding(dp(12),dp(10),dp(12),dp(10)); background=bg(t.light,18); setOnClickListener { packIndex=i; prefs.edit().putInt("pack",i).apply(); render() } }
+            preview.addView(text(t.title,14f,Color.WHITE,true))
+            preview.addView(text(t.subtitle,10f,0xFFD6D5DE.toInt()).apply { setPadding(0,dp(4),0,0) })
+            horizontal.addView(preview,LinearLayout.LayoutParams(dp(150),dp(80)).apply { rightMargin=dp(8) })
+        }
+        themeScroll.addView(horizontal)
+        container.addView(themeScroll,LinearLayout.LayoutParams(-1,dp(88)))
+        val applyBtn=text("APPLY WALLPAPER",13f,p.base,true).apply {
+            gravity=Gravity.CENTER; background=bg(p.accent,16); setPadding(dp(12),dp(16),dp(12),dp(16))
+            setOnClickListener { setWallpaper(p) }
+        }
+        container.addView(applyBtn,LinearLayout.LayoutParams(-1,-2).apply { topMargin=dp(14) })
+        container.addView(text("Choose Noctis in Android’s Home app settings to use this launcher as your home screen. Apps outside this launcher keep their original icons.",11f,0xFFB4B4C2.toInt()).apply { setPadding(0,dp(16),0,0 })
     }
 
-    private fun getLaunchableApps(): List<android.content.pm.ResolveInfo> {
-        val intent = Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_LAUNCHER)
-        return packageManager.queryIntentActivities(intent, 0)
-            .filter { it.activityInfo.packageName != packageName }
-            .sortedBy { it.loadLabel(packageManager).toString().lowercase() }
+    private fun queryApps():List<ResolveInfo> {
+        val i=Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_LAUNCHER)
+        return packageManager.queryIntentActivities(i,0).filter { it.activityInfo.packageName!=packageName }.sortedBy { it.loadLabel(packageManager).toString().lowercase() }
     }
-
-    private fun applyTheme(theme: Theme) {
+    private fun setWallpaper(t:ThemePack) {
         try {
-            val manager = WallpaperManager.getInstance(this)
-            manager.setBitmap(makeWallpaper(theme), null, true, WallpaperManager.FLAG_SYSTEM)
-            getSharedPreferences("noctis", MODE_PRIVATE).edit().putInt("theme", selected).apply()
-            Toast.makeText(this, "Wallpaper set. Noctis launcher theme is active in this Home screen.", Toast.LENGTH_LONG).show()
-            render()
-        } catch (e: Exception) {
-            Toast.makeText(this, "Couldn't apply wallpaper: " + (e.message ?: "device restriction"), Toast.LENGTH_LONG).show()
-        }
+            WallpaperManager.getInstance(this).setBitmap(createBitmap(t),null,true,WallpaperManager.FLAG_SYSTEM)
+            Toast.makeText(this,"Wallpaper applied to Home screen.",Toast.LENGTH_LONG).show()
+        } catch(e:Exception) { Toast.makeText(this,"Wallpaper permission failed: "+(e.message ?: ""),Toast.LENGTH_LONG).show() }
     }
-
-    private fun rounded(color: Int, radius: Int) = GradientDrawable().apply { setColor(color); cornerRadius = radius.toFloat() }
-
-    private fun label(text: String, size: Float, color: Int, bold: Boolean = false) = TextView(this).apply {
-        this.text = text; textSize = size; setTextColor(color)
-        if (bold) setTypeface(android.graphics.Typeface.DEFAULT, android.graphics.Typeface.BOLD)
-    }
-
-    private fun makeWallpaper(theme: Theme): Bitmap {
-        val width = 1080
-        val height = 2160
-        val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
-        val canvas = Canvas(bitmap)
-        val paint = Paint(Paint.ANTI_ALIAS_FLAG)
-        paint.shader = LinearGradient(0f, 0f, width.toFloat(), height.toFloat(), theme.top, theme.bottom, Shader.TileMode.CLAMP)
-        canvas.drawRect(0f, 0f, width.toFloat(), height.toFloat(), paint)
-        paint.shader = null
-        paint.color = theme.accent
-        paint.alpha = 35
-        canvas.drawCircle(width * .78f, height * .24f, width * .26f, paint)
-        return bitmap
+    private fun createBitmap(t:ThemePack):Bitmap {
+        val w=1080; val h=2160
+        val b=Bitmap.createBitmap(w,h,Bitmap.Config.ARGB_8888); val c=Canvas(b); val paint=Paint(Paint.ANTI_ALIAS_FLAG)
+        paint.shader=LinearGradient(0f,0f,w.toFloat(),h.toFloat(),t.base,t.light,Shader.TileMode.CLAMP)
+        c.drawRect(0f,0f,w.toFloat(),h.toFloat(),paint); paint.shader=null
+        paint.color=t.accent; paint.alpha=35; c.drawCircle(w*.78f,h*.22f,w*.27f,paint)
+        return b
     }
 }
