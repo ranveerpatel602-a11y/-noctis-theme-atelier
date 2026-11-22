@@ -79,7 +79,7 @@ class MainActivity : Activity() {
         top.addView(text("NOCTIS",12f,p.accent,true),LinearLayout.LayoutParams(0,-2,1f))
         top.addView(text("⋯",26f,Color.WHITE).apply { gravity=Gravity.CENTER; background=bg(0x22FFFFFF,24); setPadding(dp(14),dp(3),dp(14),dp(3)) })
         container.addView(top)
-        val creatorButton=text("CREATOR STUDIO  •  SELL THEMES",12f,Color.WHITE,true).apply {
+        val creatorButton=text("CREATOR STUDIO  •  THEME DRAFTS",12f,Color.WHITE,true).apply {
             gravity=Gravity.CENTER; background=bg(p.light,16); setPadding(dp(12),dp(13),dp(12),dp(13))
             setOnClickListener { openCreatorStudio() }
         }
@@ -202,22 +202,40 @@ class MainActivity : Activity() {
     }
 
     private fun openCreatorStudio() {
-        val nameField=EditText(this).apply { hint="Theme pack name"; setText(prefs.getString("creator_name","")) }
-        val priceField=EditText(this).apply { hint="Optional suggested price in INR"; inputType=2; setText(prefs.getString("creator_price","")) }
-        val form=LinearLayout(this).apply { orientation=LinearLayout.VERTICAL; setPadding(dp(20),dp(8),dp(20),dp(4)); addView(nameField); addView(priceField) }
-        AlertDialog.Builder(this).setTitle("Noctis Creator Studio").setMessage("Create a theme listing draft").setView(form)
-            .setPositiveButton("Save listing draft") { _,_ ->
-                prefs.edit().putString("creator_name",nameField.text.toString().ifBlank{"Untitled theme"})
-                    .putString("creator_price",priceField.text.toString()).putString("listing_draft","saved").apply()
+        val nameField=EditText(this).apply {
+            hint="Theme pack name"
+            setText(prefs.getString("creator_name",""))
+        }
+        val descriptionField=EditText(this).apply {
+            hint="Describe the theme (colors, mood, icons)"
+            setText(prefs.getString("creator_description",""))
+            minLines=3
+        }
+        val form=LinearLayout(this).apply {
+            orientation=LinearLayout.VERTICAL
+            setPadding(dp(20),dp(8),dp(20),dp(4))
+            addView(nameField)
+            addView(descriptionField)
+        }
+        AlertDialog.Builder(this).setTitle("Noctis Creator Studio")
+            .setMessage("Create a theme concept draft on this device.")
+            .setView(form)
+            .setPositiveButton("Save theme draft") { _,_ ->
+                prefs.edit()
+                    .putString("creator_name",nameField.text.toString().ifBlank{"Untitled theme"})
+                    .putString("creator_description",descriptionField.text.toString())
+                    .putString("listing_draft","saved").apply()
                 Toast.makeText(this,"Draft saved locally on this phone.",Toast.LENGTH_SHORT).show()
-            }.setNeutralButton("View my draft") { _,_ ->
+            }
+            .setNeutralButton("View my draft") { _,_ ->
                 val saved=prefs.getString("listing_draft","")
                 val title=prefs.getString("creator_name","Untitled theme") ?: "Untitled theme"
-                val price=prefs.getString("creator_price","") ?: ""
-                AlertDialog.Builder(this).setTitle("My theme listing")
-                    .setMessage(if(saved=="saved") "$title\\nSuggested price: ${if(price.isBlank()) "Not set" else "₹$price"}\\nStatus: Local draft, not published" else "No listing draft saved yet.")
+                val description=prefs.getString("creator_description","") ?: ""
+                AlertDialog.Builder(this).setTitle("My theme draft")
+                    .setMessage(if(saved=="saved") "$title\\n\\n$description\\n\\nStatus: Saved locally" else "No theme draft saved yet.")
                     .setPositiveButton("OK",null).show()
-            }.setNegativeButton("Cancel",null).show()
+            }
+            .setNegativeButton("Cancel",null).show()
     }
 
     private fun queryApps():List<ResolveInfo> {
