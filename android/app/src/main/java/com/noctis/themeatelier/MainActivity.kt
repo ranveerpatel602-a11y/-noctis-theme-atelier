@@ -4,6 +4,8 @@ import android.app.Activity
 import android.app.AlertDialog
 import android.app.WallpaperManager
 import android.content.Intent
+import android.net.Uri
+import android.graphics.BitmapFactory
 import android.content.pm.ResolveInfo
 import android.graphics.Bitmap
 import android.graphics.Canvas
@@ -39,12 +41,14 @@ class MainActivity : Activity() {
     private var packIndex = 0
     private lateinit var container: LinearLayout
     private var searchText = ""
+    private var selectedWallpaperUri: Uri? = null
     private val prefs by lazy { getSharedPreferences("noctis-launcher", MODE_PRIVATE) }
     private val appList by lazy { queryApps() }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         packIndex = prefs.getInt("pack",0).coerceIn(packs.indices)
+        selectedWallpaperUri = prefs.getString("wallpaper_uri", null)?.let { Uri.parse(it) }
         render()
     }
 
@@ -142,7 +146,45 @@ class MainActivity : Activity() {
             setOnClickListener { setWallpaper(p) }
         }
         container.addView(applyBtn,LinearLayout.LayoutParams(-1,-2).apply { topMargin=dp(14) })
+        val photoBtn=text("CHOOSE PHOTO WALLPAPER",13f,Color.WHITE,true).apply {
+            gravity=Gravity.CENTER; background=bg(0x22FFFFFF,16); setPadding(dp(12),dp(15),dp(12),dp(15))
+            setOnClickListener { openWallpaperPicker() }
+        }
+        container.addView(photoBtn,LinearLayout.LayoutParams(-1,-2).apply { topMargin=dp(8) })
+        selectedWallpaperUri?.let { uri ->
+            val preview=ImageView(this).apply { setImageURI(uri); scaleType=ImageView.ScaleType.CENTER_CROP }
+            container.addView(preview,LinearLayout.LayoutParams(-1,dp(220)).apply { topMargin=dp(10) })
+        }
+        val saveThemeBtn=text("SAVE CURRENT THEME",13f,Color.WHITE,true).apply {
+            gravity=Gravity.CENTER; background=bg(p.light,16); setPadding(dp(12),dp(15),dp(12),dp(15))
+            setOnClickListener {
+                prefs.edit().putInt("saved_theme_pack",packIndex)
+                    .putString("saved_wallpaper_uri",selectedWallpaperUri?.toString() ?: "").apply()
+                Toast.makeText(this,"Theme saved on this phone.",Toast.LENGTH_SHORT).show()
+            }
+        }
+        container.addView(saveThemeBtn,LinearLayout.LayoutParams(-1,-2).apply { topMargin=dp(8) })
         container.addView(text("Choose Noctis in Android’s Home app settings to use this launcher as your home screen. Apps outside this launcher keep their original icons.",11f,0xFFB4B4C2.toInt()).apply { setPadding(0,dp(16),0,0 })
+    }
+
+    private fun openWallpaperPicker() {
+        val intent=Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
+            addCategory(Intent.CATEGORY_OPENABLE)
+            type="image/*"
+        }
+        try { startActivityForResult(intent, 4102) }
+        catch (_:Exception) { Toast.makeText(this,"Photo picker unavailable.",Toast.LENGTH_SHORT).show() }
+    }
+
+    override fun onActivityResult(requestCode:Int,resultCode:Int,data:Intent?) {
+        super.onActivityResult(requestCode,resultCode,data)
+        if(requestCode==4102 && resultCode==RESULT_OK) {
+            val uri=data?.data ?: return
+            try { contentResolver.takePersistableUriPermission(uri,Intent.FLAG_GRANT_READ_URI_PERMISSION) } catch (_:Exception) {}
+            selectedWallpaperUri=uri
+            prefs.edit().putString("wallpaper_uri",uri.toString()).apply()
+            render()
+        }
     }
 
     private fun openCreatorStudio() {
@@ -170,9 +212,11 @@ class MainActivity : Activity() {
     }
     private fun setWallpaper(t:ThemePack) {
         try {
-            WallpaperManager.getInstance(this).setBitmap(createBitmap(t),null,true,WallpaperManager.FLAG_SYSTEM)
-            Toast.makeText(this,"Wallpaper applied to Home screen.",Toast.LENGTH_LONG).show()
-        } catch(e:Exception) { Toast.makeText(this,"Wallpaper permission failed: "+(e.message ?: ""),Toast.LENGTH_LONG).show() }
+            val uri=selectedWallpaperUri
+            val bitmap=if(uri!=null) contentResolver.openInputStream(uri)?.use { BitmapFactory.decodeStream(it) } else null
+            WallpaperManager.getInstance(this).setBitmap(bitmap ?: createBitmap(t),null,true,WallpaperManager.FLAG_SYSTEM)
+            Toast.makeText(this,"Wallpaper applied.",Toast.LENGTH_LONG).show()
+        } catch(e:Exception) { Toast.makeText(this,"Wallpaper apply failed: "+(e.message ?: ""),Toast.LENGTH_LONG).show() }
     }
     private fun createBitmap(t:ThemePack):Bitmap {
         val w=1080; val h=2160
