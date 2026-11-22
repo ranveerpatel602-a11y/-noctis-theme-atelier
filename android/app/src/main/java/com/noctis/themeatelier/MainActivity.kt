@@ -113,7 +113,7 @@ class MainActivity : Activity() {
                 val lp=GridLayout.LayoutParams(GridLayout.spec(index/4),GridLayout.spec(index%4,1f))
                 lp.width=0; lp.setMargins(dp(3),dp(2),dp(3),dp(2)); grid.addView(tile,lp)
             }
-            if(filtered.isEmpty()) grid.addView(text("No apps found",13f,0xFFB8B8C5.toInt()).apply { setPadding(0,dp(12),0,dp(12) })
+            if(filtered.isEmpty()) grid.addView(text("No apps found",13f,0xFFB8B8C5.toInt()).apply { setPadding(0,dp(12),0,dp(12)) })
         }
         populate("")
         search.addTextChangedListener(object:TextWatcher {
@@ -178,7 +178,7 @@ class MainActivity : Activity() {
             }
         }
         container.addView(loadThemeBtn,LinearLayout.LayoutParams(-1,-2).apply { topMargin=dp(8) })
-        container.addView(text("Choose Noctis in Android’s Home app settings to use this launcher as your home screen. Apps outside this launcher keep their original icons.",11f,0xFFB4B4C2.toInt()).apply { setPadding(0,dp(16),0,0 })
+        container.addView(text("Choose Noctis in Android’s Home app settings to use this launcher as your home screen. Apps outside this launcher keep their original icons.",11f,0xFFB4B4C2.toInt()).apply { setPadding(0,dp(16),0,0 }))
     }
 
     private fun openWallpaperPicker() {
