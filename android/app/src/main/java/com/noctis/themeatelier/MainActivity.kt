@@ -85,12 +85,12 @@ class MainActivity : Activity() {
         }
         container.addView(creatorButton,LinearLayout.LayoutParams(-1,-2).apply{topMargin=dp(14)})
         container.addView(text("Good day.",28f,Color.WHITE,true).apply { setPadding(0,dp(20),0,0) })
-        container.addView(text("Make this home yours.",14f,0xFFB9BBC8.toInt()).apply { setPadding(0,dp(4),0,dp(16)) }))
+        container.addView(text("Make this home yours.",14f,0xFFB9BBC8.toInt()).apply { setPadding(0,dp(4),0,dp(16)) })
 
         val search=EditText(this).apply {
             hint="Search apps"
             setHintTextColor(0xFFB5B5C2.toInt()); setTextColor(Color.WHITE)
-            textSize=14f; singleLine=true
+            textSize=14f; setSingleLine(true)
             background=bg(0x22FFFFFF.toInt(),24)
             setPadding(dp(16),dp(10),dp(16),dp(10))
         }
@@ -105,7 +105,7 @@ class MainActivity : Activity() {
                 val tile=LinearLayout(this).apply { orientation=LinearLayout.VERTICAL; gravity=Gravity.CENTER; setPadding(dp(4),dp(8),dp(4),dp(8)) }
                 val icon=ImageView(this).apply { setImageDrawable(ri.loadIcon(packageManager)); scaleType=ImageView.ScaleType.FIT_CENTER; background=bg(0x25FFFFFF,17,p.accent); setPadding(dp(8),dp(8),dp(8),dp(8)) }
                 tile.addView(icon,LinearLayout.LayoutParams(dp(56),dp(56)))
-                tile.addView(text(ri.loadLabel(packageManager).toString(),11f,Color.WHITE).apply { gravity=Gravity.CENTER; maxLines=2; setPadding(0,dp(5),0,0 },LinearLayout.LayoutParams(-1,-2))
+                tile.addView(text(ri.loadLabel(packageManager).toString(),11f,Color.WHITE).apply { gravity=Gravity.CENTER; maxLines=2; setPadding(0,dp(5),0,0) },LinearLayout.LayoutParams(-1,-2))
                 tile.setOnClickListener {
                     try { startActivity(packageManager.getLaunchIntentForPackage(ri.activityInfo.packageName)) }
                     catch (_:Exception) { Toast.makeText(this,"Unable to open app",Toast.LENGTH_SHORT).show() }
@@ -113,7 +113,7 @@ class MainActivity : Activity() {
                 val lp=GridLayout.LayoutParams(GridLayout.spec(index/4),GridLayout.spec(index%4,1f))
                 lp.width=0; lp.setMargins(dp(3),dp(2),dp(3),dp(2)); grid.addView(tile,lp)
             }
-            if(filtered.isEmpty()) grid.addView(text("No apps found",13f,0xFFB8B8C5.toInt()).apply { setPadding(0,dp(12),0,dp(12)) }))
+            if(filtered.isEmpty()) grid.addView(text("No apps found",13f,0xFFB8B8C5.toInt()).apply { setPadding(0,dp(12),0,dp(12)) })
         }
         populate("")
         search.addTextChangedListener(object:TextWatcher {
