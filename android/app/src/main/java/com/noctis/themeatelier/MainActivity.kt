@@ -164,6 +164,20 @@ class MainActivity : Activity() {
             }
         }
         container.addView(saveThemeBtn,LinearLayout.LayoutParams(-1,-2).apply { topMargin=dp(8) })
+        val loadThemeBtn=text("LOAD SAVED THEME",13f,Color.WHITE,true).apply {
+            gravity=Gravity.CENTER; background=bg(0x22FFFFFF,16); setPadding(dp(12),dp(15),dp(12),dp(15))
+            setOnClickListener {
+                val savedPack=prefs.getInt("saved_theme_pack",-1)
+                if(savedPack in packs.indices) {
+                    packIndex=savedPack
+                    val savedUri=prefs.getString("saved_wallpaper_uri","")
+                    selectedWallpaperUri=savedUri?.takeIf { it.isNotBlank() }?.let { Uri.parse(it) }
+                    prefs.edit().putInt("pack",packIndex).putString("wallpaper_uri",selectedWallpaperUri?.toString() ?: "").apply()
+                    render()
+                } else Toast.makeText(this,"No saved theme yet.",Toast.LENGTH_SHORT).show()
+            }
+        }
+        container.addView(loadThemeBtn,LinearLayout.LayoutParams(-1,-2).apply { topMargin=dp(8) })
         container.addView(text("Choose Noctis in Android’s Home app settings to use this launcher as your home screen. Apps outside this launcher keep their original icons.",11f,0xFFB4B4C2.toInt()).apply { setPadding(0,dp(16),0,0 })
     }
 
